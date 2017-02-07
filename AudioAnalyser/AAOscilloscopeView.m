@@ -19,6 +19,14 @@
     return self;
 }
 
+- (void)didMoveToSuperview {
+    [super didMoveToSuperview];
+    if (!self.drawDisplayLink) {
+        self.drawDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(setNeedsDisplay)];
+        [self.drawDisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    }
+}
+
 - (void)drawRect:(CGRect)rect {
     @synchronized (self) {
         if (dataSize == 0) {
@@ -69,7 +77,7 @@
         memcpy(data, newData, length);
         dataSize = length;
     }
-    [self performSelectorOnMainThread:@selector(setNeedsDisplay) withObject:nil waitUntilDone:YES];
+    //[self performSelectorOnMainThread:@selector(setNeedsDisplay) withObject:nil waitUntilDone:YES];
 }
 
 @end

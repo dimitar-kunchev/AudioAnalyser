@@ -10,6 +10,17 @@
 
 #define	SizeOf32(X)	((UInt32)sizeof(X))
 
+#define SWEEP_SIM
+
+NSString *NSStringFromOSStatus(OSStatus errCode);
+
+static OSStatus recordingCallback(void *inRefCon,
+                                  AudioUnitRenderActionFlags *ioActionFlags,
+                                  const AudioTimeStamp *inTimeStamp,
+                                  UInt32 inBusNumber,
+                                  UInt32 inNumberFrames,
+                                  AudioBufferList *ioData);
+
 @interface ViewController ()
 
 @end
@@ -23,7 +34,8 @@
     [self.oscilloscopeView setBytesPerSample:2];
     
     //[self setupAudioSim];
-    
+    [self attemptAUInput];
+    /*
     if ([[AVAudioSession sharedInstance] recordPermission] == AVAudioSessionRecordPermissionGranted) {
         NSLog(@"Audio permissions already granted");
         [self setupAudioInput];
@@ -33,13 +45,106 @@
                 [self setupAudioInput];
             }
         }];
-    }
+    }*/
 }
 
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void) attemptAUInput {
+    OSStatus status;
+    
+    AudioUnitElement kInputBusNumber = 1;
+    AudioUnitElement kOutputBusNumber = 0;
+    
+    AudioComponentDescription defaultInputDescription;
+    defaultInputDescription.componentType = kAudioUnitType_Output;
+    defaultInputDescription.componentSubType = kAudioUnitSubType_RemoteIO;
+    defaultInputDescription.componentManufacturer = kAudioUnitManufacturer_Apple;
+    defaultInputDescription.componentFlags = 0;
+    defaultInputDescription.componentFlagsMask = 0;
+    
+    AudioComponent inputComponent = AudioComponentFindNext(NULL, &defaultInputDescription);
+    status = AudioComponentInstanceNew(inputComponent, &_audioUnit);
+    
+    // Enable IO for recording
+    UInt32 flag = 1;
+    status = AudioUnitSetProperty(_audioUnit,
+                                  kAudioOutputUnitProperty_EnableIO,
+                                  kAudioUnitScope_Input,
+                                  kInputBusNumber,
+                                  &flag,
+                                  sizeof(flag));
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitSetProperty (enable recording)");
+        return;
+    }
+    // Disable playback IO
+    flag = 0;
+    status = AudioUnitSetProperty(_audioUnit,
+                                  kAudioOutputUnitProperty_EnableIO,
+                                  kAudioUnitScope_Output,
+                                  kOutputBusNumber,
+                                  &flag,
+                                  sizeof(flag));
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitSetProperty (disable output)");
+        return;
+    }
+    
+    // Describe format
+    AudioStreamBasicDescription audioFormat;
+    audioFormat.mSampleRate         = 44100.00;
+    audioFormat.mFormatID           = kAudioFormatLinearPCM;
+    audioFormat.mFormatFlags        = kAudioFormatFlagIsPacked | kAudioFormatFlagIsSignedInteger;
+    audioFormat.mFramesPerPacket    = 1;
+    audioFormat.mChannelsPerFrame   = 1;
+    audioFormat.mBitsPerChannel     = 16;
+    audioFormat.mBytesPerPacket     = 2;
+    audioFormat.mBytesPerFrame      = 2;
+    
+    // Apply format
+    status = AudioUnitSetProperty(_audioUnit,
+                                  kAudioUnitProperty_StreamFormat,
+                                  kAudioUnitScope_Output,
+                                  kInputBusNumber,
+                                  &audioFormat,
+                                  sizeof(audioFormat));
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitSetProperty (format)");
+        return;
+    }
+    
+    // Set input callback
+    AURenderCallbackStruct callbackStruct;
+    callbackStruct.inputProc = recordingCallback;
+    callbackStruct.inputProcRefCon = (__bridge void*)self;
+    status = AudioUnitSetProperty(_audioUnit,
+                                  kAudioOutputUnitProperty_SetInputCallback,
+                                  kAudioUnitScope_Global,
+                                  kInputBusNumber,
+                                  &callbackStruct,
+                                  sizeof(callbackStruct));
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitSetProperty (record callback): %d", status);
+        return;
+    }
+    status = AudioUnitInitialize(_audioUnit);
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitInitialize: %@", NSStringFromOSStatus(status));
+        return;
+    }
+    
+    status = AudioOutputUnitStart(_audioUnit);
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitStart: %@", NSStringFromOSStatus(status));
+        return;
+    } else {
+        NSLog(@"AU started");
+    }
 }
 
 - (void) setupAudioInput {
@@ -160,6 +265,47 @@
     [self performSelectorInBackground:@selector(audioSimulator) withObject:nil];
 }
 
+#ifdef SWEEP_SIM
+- (void) audioSimulator {
+    float t = 0;
+    float frequencyStart = 20;
+    float frequencyEnd = 20000;
+    float frequencyCurrent = frequencyStart;
+    float frequencyStep = 40;
+    float frequencyStepDuration = 0.2; // this defines how long we spend at each step! Total freq sweep time is frequencyStepDuration * (frequencyEnd - frequencyStart)/frequencyStep
+    float frequencyStepCurrentTime = 0;
+    
+    int sampleRate = 44100;
+    int bufferLength = 1024; // ints, not bytes
+    int gain = 1000;
+    float bufferDuration = (float)bufferLength / sampleRate;
+    int16_t * buffer = malloc(sizeof(int16_t) * bufferLength);
+    
+    while (true) {
+        @autoreleasepool {
+            t = t - (long)t;
+            
+            frequencyStepCurrentTime += bufferDuration;
+            if (frequencyStepCurrentTime > frequencyStepDuration) {
+                frequencyStepCurrentTime = 0;
+                frequencyCurrent += frequencyStep;
+                if (frequencyCurrent > frequencyEnd) {
+                    frequencyCurrent -= frequencyEnd;
+                }
+            }
+
+            float twoPiF = 2 * M_PI * frequencyCurrent;
+            for (int i = 0; i < bufferLength; i ++) {
+                buffer[i] = sin(twoPiF * (t + bufferDuration * i/bufferLength)) * gain;
+            }
+            t += bufferDuration;
+            [self emitAudioBuffer:buffer size:bufferLength * sizeof(uint16_t)];
+            sleep(bufferDuration);
+        }
+    }
+}
+
+#else
 - (void) audioSimulator {
     float t = 0;
     float frequency1 = 2000;
@@ -186,7 +332,7 @@
         }
     }
 }
-
+#endif
 - (void) emitAudioBuffer: (void *)buffer size:(int)size {
     [self.oscilloscopeView setData:buffer size:size];
     [self.spectrumView setData:buffer size:size];
@@ -194,3 +340,51 @@
 }
 
 @end
+
+
+
+
+static OSStatus recordingCallback(void *inRefCon,
+                                  AudioUnitRenderActionFlags *ioActionFlags,
+                                  const AudioTimeStamp *inTimeStamp,
+                                  UInt32 inBusNumber,
+                                  UInt32 inNumberFrames,
+                                  AudioBufferList *ioData) {
+    ViewController *input = (__bridge ViewController*)inRefCon;
+    
+    AudioBuffer buffer;
+    buffer.mDataByteSize = sizeof(SInt16)*inNumberFrames;
+    buffer.mNumberChannels = 1;
+    buffer.mData = malloc(sizeof(SInt16)*inNumberFrames); //
+    
+    AudioBufferList bufferList;
+    bufferList.mNumberBuffers = 1;
+    bufferList.mBuffers[0] = buffer;
+    
+    OSStatus status;
+    
+    status = AudioUnitRender([input audioUnit],
+                             ioActionFlags,
+                             inTimeStamp,
+                             inBusNumber,
+                             inNumberFrames,
+                             &bufferList);
+    
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitRender: %d", status);
+        return noErr;
+    }
+    //NSLog(@"inNoFL %d, inBNL %d", inNumberFrames, inBusNumber);
+    [input emitAudioBuffer:bufferList.mBuffers[0].mData size:bufferList.mBuffers[0].mDataByteSize];
+    
+    return noErr;
+}
+
+NSString *NSStringFromOSStatus(OSStatus errCode)
+{
+    if (errCode == noErr)
+        return @"noErr";
+    char message[5] = {0};
+    *(UInt32*) message = CFSwapInt32HostToBig(errCode);
+    return [NSString stringWithCString:message encoding:NSASCIIStringEncoding];
+}

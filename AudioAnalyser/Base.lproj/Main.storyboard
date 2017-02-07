@@ -6,7 +6,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -23,27 +22,28 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="FCJ-aw-eHd">
-                                <rect key="frame" x="16" y="20" width="343" height="647"/>
+                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zc1-2I-sZV" customClass="AASpectrumView">
-                                        <rect key="frame" x="0.0" y="0.0" width="343" height="323.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="323.5"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ph7-9i-ZRZ" customClass="AAOscilloscopeView">
-                                        <rect key="frame" x="0.0" y="323.5" width="343" height="323.5"/>
+                                        <rect key="frame" x="0.0" y="323.5" width="375" height="323.5"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
                                 </subviews>
                             </stackView>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="FCJ-aw-eHd" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="Kvw-b8-EbX"/>
+                            <constraint firstItem="FCJ-aw-eHd" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Kvw-b8-EbX"/>
                             <constraint firstItem="FCJ-aw-eHd" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="Oaa-u1-Kxp"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="FCJ-aw-eHd" secondAttribute="bottom" id="p7d-do-fup"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="FCJ-aw-eHd" secondAttribute="trailing" id="rvp-s7-ZbO"/>
+                            <constraint firstAttribute="trailing" secondItem="FCJ-aw-eHd" secondAttribute="trailing" id="rvp-s7-ZbO"/>
                         </constraints>
                     </view>
+                    <simulatedStatusBarMetrics key="simulatedStatusBarMetrics" statusBarStyle="lightContent"/>
                     <connections>
                         <outlet property="oscilloscopeView" destination="Ph7-9i-ZRZ" id="FSe-TC-Vx5"/>
                         <outlet property="spectrumView" destination="zc1-2I-sZV" id="WE5-Of-JTE"/>

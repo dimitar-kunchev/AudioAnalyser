@@ -16,6 +16,8 @@
 
 @property (nonatomic) int bytesPerSample; // This is not used - it is always 2 for the moment!
 
+@property (nonatomic, retain) CADisplayLink * drawDisplayLink;
+
 - (void) setData:(const void *)newData size:(size_t)length;
 
 @end

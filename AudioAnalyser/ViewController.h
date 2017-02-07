@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 #import "AAOscilloscopeView.h"
 #import "AASpectrumView.h"
@@ -24,6 +25,8 @@
     size_t audioBufferSize;
     NSLock * audioBufferLock;
 }
+
+@property (nonatomic) AudioComponentInstance audioUnit;
 
 @property (nonatomic, retain) IBOutlet AAOscilloscopeView * oscilloscopeView;
 @property (nonatomic, retain) IBOutlet AASpectrumView * spectrumView;

@@ -25,7 +25,7 @@
 - (void) computingLoop {
     while (!endComputingThread) {
         @autoreleasepool {
-            [NSThread sleepForTimeInterval:0.02];
+            //[NSThread sleepForTimeInterval:0.02];
             NSArray * tmp = [fft compute];
             if (tmp != nil) {
                 @synchronized (self) {
@@ -52,28 +52,25 @@
     }
     
     if (tmp) {
-        [[UIColor blueColor] setFill];
+        
+        CGContextBeginPath(context);
         
         long bands = tmp.count;
-        float bandWidth = self.bounds.size.width / bands;
-        float yFactor = (self.bounds.size.height-5);
-        float yFS = pow(2, 16);
+        
+        float yFactor = (self.bounds.size.height-5) / 50; // assume 50dB max
+        float yFS = pow(2, 15);
         for (int i = 0; i < tmp.count; i ++) {
-            float xs = i * bandWidth;
-            float ys;
-            
-            ys = log10f([tmp[i][@"p"] floatValue] / yFS) * yFactor;
-            if (ys > 1) {
-                CGContextFillRect(context, CGRectMake(xs, self.bounds.size.height-5, bandWidth, -ys));
+            float xs = (i == 0 ? 0 : self.bounds.size.width * log10f(i) / log10f(bands));
+            float ys = 20 * log10([tmp[i][@"p"] doubleValue] / yFS) * yFactor;
+            if (i == 0) {
+                CGContextMoveToPoint(context, xs, self.bounds.size.height-ys);
+            } else {
+                CGContextAddLineToPoint(context, xs, self.bounds.size.height-ys);
             }
         }
-        
-        [[UIColor yellowColor] setFill];
-        
-        for (int i = 0; i < tmp.count; i ++) {
-            float xs = i * bandWidth;
-            CGContextFillRect(context, CGRectMake(xs+1, self.bounds.size.height-5, bandWidth-2, 5));
-        }
+        [[UIColor blueColor] setStroke];
+        CGContextSetLineWidth(context, 1);
+        CGContextStrokePath(context);
     }
 }
 

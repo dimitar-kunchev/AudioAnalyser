@@ -58,34 +58,6 @@
 - (NSArray *) computeOverData:(int16_t *)data length:(long)sampleSize {
     double tmp;
     
-    // int numberOfFrequenciesToCalculate = (int)frequencies.count;
-    //double * outR = malloc(sizeof(double) * sampleSize);
-    //double * outI = malloc(sizeof(double) * sampleSize);
-//    for (int i = 0; i < sampleSize; i ++) {
-//        outR[i] = 0;
-//        outI[i] = 0;
-//        for (int sampleIndex = 0; sampleIndex < sampleSize; sampleIndex ++) {
-//            tmp = 2 * M_PI * i * sampleIndex / sampleSize;
-//            outR[i] += data[sampleIndex] * cos(tmp);
-//            outI[i] -= data[sampleIndex] * sin(tmp);
-//        }
-//    }
-    
-//    NSMutableArray * result = [NSMutableArray arrayWithCapacity:frequencies.count];
-//    for (int i = 0; i < numberOfFrequenciesToCalculate; i ++) {
-//        long outIndex = lround([frequencies[i] floatValue] * sampleSize / self.sampleRate);
-//        if (outIndex < sampleSize) {
-//            tmp = sqrt(outR[outIndex] * outR[outIndex] + outI[outIndex] * outI[outIndex]);
-//        } else {
-//            tmp = 0;
-//        }
-//        [result addObject:@{@"f": frequencies[i],
-//                            @"p": [NSNumber numberWithDouble:tmp]
-//                            }];
-//    }
-    //free(outR);
-    //free(outI);
-    
     /// First - apply windowing (Hanning)
     for (int i = 0; i < sampleSize; i++) {
         double multiplier = 0.5 * (1 - cos(2*M_PI*i/(sampleSize-1)));
