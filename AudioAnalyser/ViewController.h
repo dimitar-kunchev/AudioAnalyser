@@ -24,9 +24,16 @@
     char * audioBuffer;
     size_t audioBufferSize;
     NSLock * audioBufferLock;
+    
+@public
+    double frequency;
+    double sampleRate;
+    double theta;
+    double amplitude;
 }
 
 @property (nonatomic) AudioComponentInstance audioUnit;
+@property (nonatomic) AudioComponentInstance audioUnitOutput;
 
 @property (nonatomic, retain) IBOutlet AAOscilloscopeView * oscilloscopeView;
 @property (nonatomic, retain) IBOutlet AASpectrumView * spectrumView;

@@ -57,7 +57,7 @@
         
         //long bands = tmp.count;
         
-        float yFactor = (self.bounds.size.height-5) / 96; // pixels per dB
+        float yFactor = (self.bounds.size.height-5) / 120; // pixels per dB
         // float yFS = pow(2, 15);
         float minFreqLog = log2(20/5);
         float xFactor = self.bounds.size.width / (log2(20000/5) - minFreqLog); // max-min freq
@@ -72,8 +72,6 @@
         CGContextBeginPath(context);
         for (int i = 0; i < tmp.count; i ++) {
             float xs = ([tmp[i][@"f"] doubleValue] == 0 ? 0 : xFactor * (log2([tmp[i][@"f"] doubleValue]/5) - minFreqLog));
-            //float p = [tmp[i][@"p"] doubleValue];
-            //float ys = 20 * log10([tmp[i][@"p"] doubleValue] / yFS) * yFactor;
             float ys = [tmp[i][@"p"] doubleValue] * yFactor;
             if (i == 0) {
                 CGContextMoveToPoint(context, xs, -ys);

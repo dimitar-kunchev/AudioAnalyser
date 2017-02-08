@@ -10,6 +10,9 @@
 
 #define	SizeOf32(X)	((UInt32)sizeof(X))
 
+#define kInputBusNumber 1
+#define kOutputBusNumber 0
+
 //#define SWEEP_SIM
 
 NSString *NSStringFromOSStatus(OSStatus errCode);
@@ -21,6 +24,14 @@ static OSStatus recordingCallback(void *inRefCon,
                                   UInt32 inNumberFrames,
                                   AudioBufferList *ioData);
 
+OSStatus playbackCallback(
+                         void *inRefCon,
+                         AudioUnitRenderActionFlags 	*ioActionFlags,
+                         const AudioTimeStamp 		*inTimeStamp,
+                         UInt32 						inBusNumber,
+                         UInt32 						inNumberFrames,
+                         AudioBufferList 			*ioData);
+
 @interface ViewController ()
 
 @end
@@ -30,11 +41,12 @@ static OSStatus recordingCallback(void *inRefCon,
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
+
     [self.oscilloscopeView setBytesPerSample:2];
     
     //[self setupAudioSim];
     [self attemptAUInput];
+    [self attemptAUOutput];
     /*
     if ([[AVAudioSession sharedInstance] recordPermission] == AVAudioSessionRecordPermissionGranted) {
         NSLog(@"Audio permissions already granted");
@@ -46,6 +58,11 @@ static OSStatus recordingCallback(void *inRefCon,
             }
         }];
     }*/
+    
+    frequency = 440;
+    theta = 0;
+    sampleRate = 44100;
+    amplitude = 0.75;
 }
 
 
@@ -57,9 +74,6 @@ static OSStatus recordingCallback(void *inRefCon,
 - (void) attemptAUInput {
     OSStatus status;
     
-    AudioUnitElement kInputBusNumber = 1;
-    AudioUnitElement kOutputBusNumber = 0;
-    
     AudioComponentDescription defaultInputDescription;
     defaultInputDescription.componentType = kAudioUnitType_Output;
     defaultInputDescription.componentSubType = kAudioUnitSubType_RemoteIO;
@@ -70,7 +84,7 @@ static OSStatus recordingCallback(void *inRefCon,
     AudioComponent inputComponent = AudioComponentFindNext(NULL, &defaultInputDescription);
     status = AudioComponentInstanceNew(inputComponent, &_audioUnit);
     
-    // Enable IO for recording
+    // Enable recording
     UInt32 flag = 1;
     status = AudioUnitSetProperty(_audioUnit,
                                   kAudioOutputUnitProperty_EnableIO,
@@ -82,7 +96,7 @@ static OSStatus recordingCallback(void *inRefCon,
         NSLog(@"Error in AudioUnitSetProperty (enable recording)");
         return;
     }
-    // Disable playback IO
+    // Disable playback
     flag = 0;
     status = AudioUnitSetProperty(_audioUnit,
                                   kAudioOutputUnitProperty_EnableIO,
@@ -114,24 +128,25 @@ static OSStatus recordingCallback(void *inRefCon,
                                   &audioFormat,
                                   sizeof(audioFormat));
     if (status != noErr) {
-        NSLog(@"Error in AudioUnitSetProperty (format)");
+        NSLog(@"Error in AudioUnitSetProperty (format output)");
         return;
     }
     
     // Set input callback
-    AURenderCallbackStruct callbackStruct;
-    callbackStruct.inputProc = recordingCallback;
-    callbackStruct.inputProcRefCon = (__bridge void*)self;
+    AURenderCallbackStruct inputCallbackStruct;
+    inputCallbackStruct.inputProc = recordingCallback;
+    inputCallbackStruct.inputProcRefCon = (__bridge void*)self;
     status = AudioUnitSetProperty(_audioUnit,
                                   kAudioOutputUnitProperty_SetInputCallback,
-                                  kAudioUnitScope_Global,
+                                  kAudioUnitScope_Input,
                                   kInputBusNumber,
-                                  &callbackStruct,
-                                  sizeof(callbackStruct));
+                                  &inputCallbackStruct,
+                                  sizeof(inputCallbackStruct));
     if (status != noErr) {
         NSLog(@"Error in AudioUnitSetProperty (record callback): %d", status);
         return;
     }
+    
     status = AudioUnitInitialize(_audioUnit);
     if (status != noErr) {
         NSLog(@"Error in AudioUnitInitialize: %@", NSStringFromOSStatus(status));
@@ -147,6 +162,99 @@ static OSStatus recordingCallback(void *inRefCon,
     }
 }
 
+- (void) attemptAUOutput {
+    NSLog(@"Attempting to setup output unit");
+    OSStatus status;
+    
+    AudioComponentDescription defaultOutputDescription;
+    defaultOutputDescription.componentType = kAudioUnitType_Output;
+    defaultOutputDescription.componentSubType = kAudioUnitSubType_RemoteIO;
+    defaultOutputDescription.componentManufacturer = kAudioUnitManufacturer_Apple;
+    defaultOutputDescription.componentFlags = 0;
+    defaultOutputDescription.componentFlagsMask = 0;
+    
+    AudioComponent outputComponent = AudioComponentFindNext(NULL, &defaultOutputDescription);
+    status = AudioComponentInstanceNew(outputComponent, &_audioUnitOutput);
+    
+    // Disable recording
+    UInt32 flag = 0;
+    status = AudioUnitSetProperty(_audioUnitOutput,
+                                  kAudioOutputUnitProperty_EnableIO,
+                                  kAudioUnitScope_Input,
+                                  kInputBusNumber,
+                                  &flag,
+                                  sizeof(flag));
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitSetProperty (enable recording)");
+        return;
+    }
+    
+    // Enable playback
+    flag = 1;
+    status = AudioUnitSetProperty(_audioUnitOutput,
+                                  kAudioOutputUnitProperty_EnableIO,
+                                  kAudioUnitScope_Output,
+                                  kOutputBusNumber,
+                                  &flag,
+                                  sizeof(flag));
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitSetProperty (disable output)");
+        return;
+    }
+    
+    // Describe format
+    AudioStreamBasicDescription audioFormat;
+    audioFormat.mSampleRate         = 44100.00;
+    audioFormat.mFormatID           = kAudioFormatLinearPCM;
+    audioFormat.mFormatFlags        = kAudioFormatFlagsNativeFloatPacked; /// | kAudioFormatFlagIsNonInterleaved
+    audioFormat.mFramesPerPacket    = 1;
+    audioFormat.mChannelsPerFrame   = 2;
+    audioFormat.mBitsPerChannel     = 32;
+    audioFormat.mBytesPerPacket     = 8;
+    audioFormat.mBytesPerFrame      = 8;
+    // Apply format
+    status = AudioUnitSetProperty(_audioUnitOutput,
+                                  kAudioUnitProperty_StreamFormat,
+                                  kAudioUnitScope_Input,
+                                  kOutputBusNumber,
+                                  &audioFormat,
+                                  sizeof(audioFormat));
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitSetProperty (format input)");
+        return;
+    }
+
+    
+    // Set render callback
+    AURenderCallbackStruct playbackCallbackStruct;
+    playbackCallbackStruct.inputProc = playbackCallback;
+    playbackCallbackStruct.inputProcRefCon = (__bridge void*)self;
+    status = AudioUnitSetProperty(_audioUnitOutput,
+                                  kAudioUnitProperty_SetRenderCallback,
+                                  kAudioUnitScope_Input,
+                                  kOutputBusNumber,
+                                  &playbackCallbackStruct,
+                                  sizeof(playbackCallbackStruct));
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitSetProperty (render callback): %@", NSStringFromOSStatus(status));
+        return;
+    }
+    
+    status = AudioUnitInitialize(_audioUnitOutput);
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitInitialize: %@", NSStringFromOSStatus(status));
+        return;
+    }
+    
+    status = AudioOutputUnitStart(_audioUnitOutput);
+    if (status != noErr) {
+        NSLog(@"Error in AudioUnitStart: %@", NSStringFromOSStatus(status));
+        return;
+    } else {
+        NSLog(@"AU started");
+    }
+}
+/*
 - (void) setupAudioInput {
     NSLog (@"Sample rate is: %f", [[AVAudioSession sharedInstance] sampleRate]);
     NSLog (@"Buffer length is: %f", [[AVAudioSession sharedInstance] IOBufferDuration]);
@@ -260,6 +368,7 @@ static OSStatus recordingCallback(void *inRefCon,
     theSize += inNumberBuffers * SizeOf32(AudioBuffer);
     return theSize;
 }
+*/
 
 - (void) setupAudioSim {
     [self performSelectorInBackground:@selector(audioSimulator) withObject:nil];
@@ -311,7 +420,6 @@ static OSStatus recordingCallback(void *inRefCon,
     float frequency1 = 2000;
     float frequency2 = 1500;
     int bufferLength = 1024;
-    int sampleRate = 44100;
     int gain1 = 500;
     int gain2 = 0;
     float bufferDuration = (float)bufferLength / sampleRate;
@@ -350,6 +458,7 @@ static OSStatus recordingCallback(void *inRefCon,
                                   UInt32 inBusNumber,
                                   UInt32 inNumberFrames,
                                   AudioBufferList *ioData) {
+    //NSLog(@"Rec callback bus %d", inBusNumber);
     ViewController *input = (__bridge ViewController*)inRefCon;
     
     AudioBuffer buffer;
@@ -378,6 +487,44 @@ static OSStatus recordingCallback(void *inRefCon,
     [input emitAudioBuffer:bufferList.mBuffers[0].mData size:bufferList.mBuffers[0].mDataByteSize];
     
     free(buffer.mData);
+    
+    return noErr;
+}
+
+OSStatus playbackCallback(
+                    void *inRefCon,
+                    AudioUnitRenderActionFlags 	*ioActionFlags,
+                    const AudioTimeStamp 		*inTimeStamp,
+                    UInt32 						inBusNumber,
+                    UInt32 						inNumberFrames,
+                    AudioBufferList 			*ioData)
+
+{
+    // Get the tone parameters out of the view controller
+    ViewController *viewController = (__bridge ViewController *)inRefCon;
+    double theta = viewController->theta;
+    double theta_increment = 2.0 * M_PI * viewController->frequency / viewController->sampleRate;
+    double amplitude = viewController->amplitude;
+    
+    Float32 *buffer = (Float32 *)ioData->mBuffers[0].mData;
+    int numberOfChannels = ioData->mBuffers[0].mNumberChannels;
+    
+    // Generate the samples
+    for (UInt32 frame = 0; frame < inNumberFrames*numberOfChannels; frame += numberOfChannels) {
+        buffer[frame] = sin(theta) * amplitude;
+        if (numberOfChannels > 1) {
+            buffer[frame+1] = buffer[frame];
+        }
+        
+        theta += theta_increment;
+        if (theta > 2.0 * M_PI)
+        {
+            theta -= 2.0 * M_PI;
+        }
+    }
+    
+    // Store the theta back in the view controller
+    viewController->theta = theta;
     
     return noErr;
 }

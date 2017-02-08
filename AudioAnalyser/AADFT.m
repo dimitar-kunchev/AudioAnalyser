@@ -13,24 +13,11 @@
 - (id) initWithSampleRate:(int)sampleRate {
     self = [super init];
     if (self) {
-        bufferSize = 2048 * 2;
+        bufferSize = 2048 * 4;
         buffer = malloc(bufferSize);
         _sampleRate = sampleRate;
         
         NSMutableArray * tmpFrequencies = [NSMutableArray array];
-        /*
-        for (int i = 20; i < 100; i += 10) {
-            [tmpFrequencies addObject:@(i)];
-        }
-        for (int i = 100; i < 1000; i += 50) {
-            [tmpFrequencies addObject:@(i)];
-        }
-        for (int i = 1000; i < 5000; i += 100) {
-            [tmpFrequencies addObject:@(i)];
-        }
-        for (int i = 5000; i < 20000; i += 1000) {
-            [tmpFrequencies addObject:@(i)];
-        }*/
         for (int i = 10; i < 20; i += 2) {
             [tmpFrequencies addObject:@(i)];
         }
@@ -58,129 +45,6 @@
     free (buffer);
     buffer = NULL;
 }
-
-/// outData will be alloc'ed but you have to free it
-/*
-- (NSArray *) computeOverData:(int16_t *)data length:(long)sampleSize {
-    double tmp;
-    
-    /// First - apply windowing (Hanning)
-    for (int i = 0; i < sampleSize; i++) {
-        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(sampleSize-1)));
-        data[i] = multiplier * data[i];
-    }
-    
-    NSMutableArray * result = [NSMutableArray arrayWithCapacity:frequencies.count];
-    long sampleSizeSq = sampleSize * sampleSize;
-    for (int fi = 0; fi < frequencies.count; fi ++) {
-        double R = 0;
-        double I = 0;
-        double k = [frequencies[fi] floatValue] * sampleSize / self.sampleRate;
-        double tmpFactor = 2 * M_PI * k / sampleSize;
-        for (int sampleIndex = 0; sampleIndex < sampleSize; sampleIndex ++) {
-            tmp = tmpFactor * sampleIndex;
-            R += data[sampleIndex] * cos(tmp);
-            I -= data[sampleIndex] * sin(tmp);
-        }
-        //tmp = sqrt(R * R + I * I);
-        tmp = 10 * log10(4 * (R*R + I*I) / sampleSizeSq);
-        [result addObject:@{@"f": frequencies[fi],
-                            @"p": @(tmp)
-                            }];
-    }
-    
-    return result;
-}*/
-
-// Based on Radix-2 algorithm
-/* This isn't really working, no idea why
-- (NSArray *) computeOverData:(int16_t *)data length:(int)n {
-    if (n == 1) {
-        return @[];
-    }
-    
-    int levels = -1;
-    for (int i = 0; i < 32; i++) {
-        if (1 << i == n)
-            levels = i;  // Equal to log2(n)
-    }
-    if (levels == -1) {
-        NSLog (@"Length is not a power of 2");
-        return @[];
-    }
-    
-    NSMutableArray * result = [NSMutableArray arrayWithCapacity:n];
-    NSMutableArray * cosTable = [NSMutableArray arrayWithCapacity:n / 2];
-    NSMutableArray * sinTable = [NSMutableArray arrayWithCapacity:n / 2];
-    for (int i = 0; i < n/2; i ++) {
-        cosTable[i] = @(cos(2 * M_PI * i / n));
-        sinTable[i] = @(sin(2 * M_PI * i / n));
-    }
-    
-    // prep in-out arrays
-    double * real = malloc(sizeof(double) * n);
-    double * imag = malloc(sizeof(double) * n);
-    for (int i = 0; i < n; i ++) {
-        real[i] = data[i];
-        imag[i] = 0;
-    }
-    
-    // Bit-reversed addressing permutation
-    for (int i = 0; i < n; i++) {
-        int j = [self reverse:i bits:levels];
-        if (j > i) {
-            int16_t temp = data[i];
-            data[i] = data[j];
-            data[j] = temp;
-            / temp = imag[i];
-            imag[i] = imag[j];
-            imag[j] = temp; /
-        }
-    }
-    
-    // Cooley-Tukey decimation-in-time radix-2 FFT
-    for (int size = 2; size <= n; size *= 2) {
-        int halfsize = size / 2;
-        int tablestep = n / size;
-        for (int i = 0; i < n; i += size) {
-            for (int j = i, k = 0; j < i + halfsize; j++, k += tablestep) {
-                double tpre =  real[j+halfsize] * [cosTable[k] doubleValue] + imag[j+halfsize] * [sinTable[k] doubleValue];
-                double tpim = -real[j+halfsize] * [sinTable[k] doubleValue] + imag[j+halfsize] * [cosTable[k] doubleValue];
-                real[j + halfsize] = real[j] - tpre;
-                imag[j + halfsize] = imag[j] - tpim;
-                real[j] += tpre;
-                imag[j] += tpim;
-            }
-        }
-    }
-    
-    double tmp;
-    double sampleSizeSq = n * n;
-    double freqFactor = (double)self.sampleRate / n;
-    for (int i = 0; i < n; i += 10) {
-        tmp = 10 * log10(4 * (real[i] * real[i] + imag[i] * imag[i]) / sampleSizeSq);
-        [result addObject:@{@"f": @(i * freqFactor),
-                            @"p": @(tmp)
-                            }];
-    }
-    
-    free(real);
-    free(imag);
-    
-    return result;
-}
-
-// Returns the integer whose value is the reverse of the lowest 'bits' bits of the integer 'x'.
-- (int) reverse:(int)x bits:(int) bits {
-    int y = 0;
-    for (int i = 0; i < bits; i++) {
-        y = (y << 1) | (x & 1);
-        x >>= 1;
-    }
-    return y;
-}
-
- */
 
 - (NSArray *) computeOverData:(int16_t *)data length:(int)n {
     // Hamming window? Or better to use Hann? Blkman?
@@ -240,7 +104,7 @@
                         }];
     for (int i = 1; i * freqFactor < 20000; i ++) {
         [result addObject:@{@"f": @(i * freqFactor),
-                            @"p": @(spectrum[i] - 120)
+                            @"p": @(spectrum[i] - 144)
                             }];
     }
     free(spectrum);
