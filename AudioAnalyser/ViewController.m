@@ -10,7 +10,7 @@
 
 #define	SizeOf32(X)	((UInt32)sizeof(X))
 
-#define SWEEP_SIM
+//#define SWEEP_SIM
 
 NSString *NSStringFromOSStatus(OSStatus errCode);
 
@@ -313,7 +313,7 @@ static OSStatus recordingCallback(void *inRefCon,
     int bufferLength = 1024;
     int sampleRate = 44100;
     int gain1 = 500;
-    int gain2 = 1000;
+    int gain2 = 0;
     float bufferDuration = (float)bufferLength / sampleRate;
     int16_t * buffer = malloc(sizeof(int16_t) * bufferLength);
     

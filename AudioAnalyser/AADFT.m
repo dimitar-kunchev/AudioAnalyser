@@ -55,6 +55,7 @@
 }
 
 /// outData will be alloc'ed but you have to free it
+/*
 - (NSArray *) computeOverData:(int16_t *)data length:(long)sampleSize {
     double tmp;
     
@@ -84,6 +85,136 @@
     }
     
     return result;
+}*/
+
+// Based on Radix-2 algorithm
+/* This isn't really working, no idea why
+- (NSArray *) computeOverData:(int16_t *)data length:(int)n {
+    if (n == 1) {
+        return @[];
+    }
+    
+    int levels = -1;
+    for (int i = 0; i < 32; i++) {
+        if (1 << i == n)
+            levels = i;  // Equal to log2(n)
+    }
+    if (levels == -1) {
+        NSLog (@"Length is not a power of 2");
+        return @[];
+    }
+    
+    NSMutableArray * result = [NSMutableArray arrayWithCapacity:n];
+    NSMutableArray * cosTable = [NSMutableArray arrayWithCapacity:n / 2];
+    NSMutableArray * sinTable = [NSMutableArray arrayWithCapacity:n / 2];
+    for (int i = 0; i < n/2; i ++) {
+        cosTable[i] = @(cos(2 * M_PI * i / n));
+        sinTable[i] = @(sin(2 * M_PI * i / n));
+    }
+    
+    // prep in-out arrays
+    double * real = malloc(sizeof(double) * n);
+    double * imag = malloc(sizeof(double) * n);
+    for (int i = 0; i < n; i ++) {
+        real[i] = data[i];
+        imag[i] = 0;
+    }
+    
+    // Bit-reversed addressing permutation
+    for (int i = 0; i < n; i++) {
+        int j = [self reverse:i bits:levels];
+        if (j > i) {
+            int16_t temp = data[i];
+            data[i] = data[j];
+            data[j] = temp;
+            / temp = imag[i];
+            imag[i] = imag[j];
+            imag[j] = temp; /
+        }
+    }
+    
+    // Cooley-Tukey decimation-in-time radix-2 FFT
+    for (int size = 2; size <= n; size *= 2) {
+        int halfsize = size / 2;
+        int tablestep = n / size;
+        for (int i = 0; i < n; i += size) {
+            for (int j = i, k = 0; j < i + halfsize; j++, k += tablestep) {
+                double tpre =  real[j+halfsize] * [cosTable[k] doubleValue] + imag[j+halfsize] * [sinTable[k] doubleValue];
+                double tpim = -real[j+halfsize] * [sinTable[k] doubleValue] + imag[j+halfsize] * [cosTable[k] doubleValue];
+                real[j + halfsize] = real[j] - tpre;
+                imag[j + halfsize] = imag[j] - tpim;
+                real[j] += tpre;
+                imag[j] += tpim;
+            }
+        }
+    }
+    
+    double tmp;
+    double sampleSizeSq = n * n;
+    double freqFactor = (double)self.sampleRate / n;
+    for (int i = 0; i < n; i += 10) {
+        tmp = 10 * log10(4 * (real[i] * real[i] + imag[i] * imag[i]) / sampleSizeSq);
+        [result addObject:@{@"f": @(i * freqFactor),
+                            @"p": @(tmp)
+                            }];
+    }
+    
+    free(real);
+    free(imag);
+    
+    return result;
+}
+
+// Returns the integer whose value is the reverse of the lowest 'bits' bits of the integer 'x'.
+- (int) reverse:(int)x bits:(int) bits {
+    int y = 0;
+    for (int i = 0; i < bits; i++) {
+        y = (y << 1) | (x & 1);
+        x >>= 1;
+    }
+    return y;
+}
+
+ */
+
+- (NSArray *) computeOverData:(int16_t *)data length:(int)n {
+    DSPComplex * buf = malloc(sizeof(DSPComplex) * n);
+    
+    for (int i = 0; i < n; i ++) {
+        buf[i].real = data[i];
+        buf[i].imag = 0;
+    }
+    
+    float inputMemory[2*n];
+    float outputMemory[2*n];
+    // half for real and half for complex
+    DSPSplitComplex inputSplit = {inputMemory, inputMemory + n};
+    DSPSplitComplex outputSplit = {outputMemory, outputMemory + n};
+    
+    vDSP_ctoz(buf, 2, &inputSplit, 1, n);
+    
+    vDSP_DFT_Setup setup = vDSP_DFT_zop_CreateSetup(NULL, n, vDSP_DFT_FORWARD);
+    
+    vDSP_DFT_Execute(setup,
+                     inputSplit.realp, inputSplit.imagp,
+                     outputSplit.realp, outputSplit.imagp);
+    
+    vDSP_ztoc(&outputSplit, 1, buf, 2, n);
+    
+    NSMutableArray * result = [NSMutableArray arrayWithCapacity:n];
+    
+    double tmp;
+    int sampleSizeSq = n * n;
+    double freqFactor = (double)self.sampleRate / n;
+    for (int i = 0; i < n; i ++) {
+        tmp = 10 * log10(4 * (buf[i].real * buf[i].real + buf[i].imag * buf[i].imag) / sampleSizeSq);
+        [result addObject:@{@"f": @(i * freqFactor),
+                            @"p": @(tmp)
+                            }];
+    }
+    
+    free (buf);
+    return result;
 }
 
 - (NSArray *) compute {
@@ -102,11 +233,12 @@
     
     NSArray * res = nil;
     if (gotBuffer) {
-        res = [self computeOverData:tmpBuffer length:tmpBufferSize/2];
+        res = [self computeOverData:tmpBuffer length:(int)tmpBufferSize/2];
     }
     free (tmpBuffer);
 
     return res;
 }
+
 
 @end

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09F506031E4B59EF008E982D /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09F506021E4B59EF008E982D /* Accelerate.framework */; };
 		564B0ABB1E48ABA400A73A50 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 564B0ABA1E48ABA400A73A50 /* AudioToolbox.framework */; };
 		56532D081E4625CF00F49DD0 /* AASpectrumView.m in Sources */ = {isa = PBXBuildFile; fileRef = 56532D071E4625CF00F49DD0 /* AASpectrumView.m */; };
 		56C65B041E45C82F00F2EADB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 56C65B031E45C82F00F2EADB /* main.m */; };
@@ -23,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		09F506021E4B59EF008E982D /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		564B0ABA1E48ABA400A73A50 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		56532D061E4625CF00F49DD0 /* AASpectrumView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AASpectrumView.h; sourceTree = "<group>"; };
 		56532D071E4625CF00F49DD0 /* AASpectrumView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AASpectrumView.m; sourceTree = "<group>"; };
@@ -51,6 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				09F506031E4B59EF008E982D /* Accelerate.framework in Frameworks */,
 				564B0ABB1E48ABA400A73A50 /* AudioToolbox.framework in Frameworks */,
 				56C65B211E45D7AA00F2EADB /* CoreAudio.framework in Frameworks */,
 				56C65B1F1E45D79200F2EADB /* CoreMedia.framework in Frameworks */,
@@ -111,6 +114,7 @@
 		56C65B191E45C85F00F2EADB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				09F506021E4B59EF008E982D /* Accelerate.framework */,
 				564B0ABA1E48ABA400A73A50 /* AudioToolbox.framework */,
 				56C65B201E45D7AA00F2EADB /* CoreAudio.framework */,
 				56C65B1E1E45D79200F2EADB /* CoreMedia.framework */,
@@ -151,7 +155,7 @@
 				TargetAttributes = {
 					56C65AFE1E45C82F00F2EADB = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = JDLB48M39F;
+						DevelopmentTeam = 7Q9FSUUEZX;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -317,7 +321,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = JDLB48M39F;
+				DEVELOPMENT_TEAM = 7Q9FSUUEZX;
 				INFOPLIST_FILE = AudioAnalyser/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.hometest.AudioAnalyser;
@@ -329,7 +333,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = JDLB48M39F;
+				DEVELOPMENT_TEAM = 7Q9FSUUEZX;
 				INFOPLIST_FILE = AudioAnalyser/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.hometest.AudioAnalyser;
