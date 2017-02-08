@@ -14,6 +14,8 @@
     AADFT * fft;
     BOOL endComputingThread;
     NSArray * fftComputedData;
+    
+    NSArray * frequencyLines;
 }
 
 - (void) setData:(const void *)newData size:(size_t)length;

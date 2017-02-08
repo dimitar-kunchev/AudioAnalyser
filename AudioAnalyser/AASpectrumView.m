@@ -17,6 +17,8 @@
         
         endComputingThread = NO;
         
+        frequencyLines = [NSArray arrayWithObjects:@(10), @(20), @(50), @(100), @(200), @(500), @(1000), @(2000), @(5000), @(10000), @(20000), nil];
+        
         [self performSelectorInBackground:@selector(computingLoop) withObject:NULL];
     }
     return self;
@@ -53,15 +55,25 @@
     
     if (tmp) {
         
-        CGContextBeginPath(context);
+        //long bands = tmp.count;
         
-        long bands = tmp.count;
-        
-        float yFactor = (self.bounds.size.height-5) / 50; // assume 50dB max
+        float yFactor = (self.bounds.size.height-5) / 130; // assume 50dB max
         float yFS = pow(2, 15);
+        float xFactor = self.bounds.size.width / log2(20000/5);
+        
+        // first draw a few vertical lines to mark some frequencies
+        [[UIColor grayColor] setFill];
+        for (NSNumber * fl in frequencyLines) {
+            float x = xFactor * log2(fl.floatValue/5);
+            CGContextFillRect(context, CGRectMake(x-0.5, 0, 1, self.bounds.size.height));
+        }
+        
+        CGContextBeginPath(context);
         for (int i = 0; i < tmp.count; i ++) {
-            float xs = (i == 0 ? 0 : self.bounds.size.width * log10f(i) / log10f(bands));
-            float ys = 20 * log10([tmp[i][@"p"] doubleValue] / yFS) * yFactor;
+            float xs = ([tmp[i][@"f"] doubleValue] == 0 ? 0 : xFactor * log2([tmp[i][@"f"] doubleValue]/5));
+            float p = [tmp[i][@"p"] doubleValue];
+            float dbLevel = (p == 0 ? -500 : 20 * log10(p));
+            float ys = dbLevel * yFactor;
             if (i == 0) {
                 CGContextMoveToPoint(context, xs, self.bounds.size.height-ys);
             } else {

@@ -31,6 +31,9 @@
         for (int i = 5000; i < 20000; i += 1000) {
             [tmpFrequencies addObject:@(i)];
         }*/
+        for (int i = 10; i < 20; i += 2) {
+            [tmpFrequencies addObject:@(i)];
+        }
         for (int i = 20; i < 20000; i += 20) {
             [tmpFrequencies addObject:@(i)];
         }
