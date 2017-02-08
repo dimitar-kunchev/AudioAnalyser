@@ -15,6 +15,8 @@
     NSArray * frequencies;
     
     NSLock * bufferLock;
+    
+    vDSP_DFT_Setup DFTSetup;
 }
 
 - (id) initWithSampleRate:(int)sampleRate;

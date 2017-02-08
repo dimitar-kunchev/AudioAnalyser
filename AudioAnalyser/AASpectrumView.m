@@ -17,7 +17,7 @@
         
         endComputingThread = NO;
         
-        frequencyLines = [NSArray arrayWithObjects:@(10), @(20), @(50), @(100), @(200), @(500), @(1000), @(2000), @(5000), @(10000), @(20000), nil];
+        frequencyLines = [NSArray arrayWithObjects:@(20), @(50), @(100), @(200), @(500), @(1000), @(2000), @(5000), @(10000), @(20000), nil];
         
         [self performSelectorInBackground:@selector(computingLoop) withObject:NULL];
     }
@@ -57,25 +57,26 @@
         
         //long bands = tmp.count;
         
-        float yFactor = (self.bounds.size.height-5) / 130; // assume 50dB max
-        float yFS = pow(2, 15);
-        float xFactor = self.bounds.size.width / log2(20000/5);
+        float yFactor = (self.bounds.size.height-5) / 96; // pixels per dB
+        // float yFS = pow(2, 15);
+        float minFreqLog = log2(20/5);
+        float xFactor = self.bounds.size.width / (log2(20000/5) - minFreqLog); // max-min freq
         
         // first draw a few vertical lines to mark some frequencies
         [[UIColor grayColor] setFill];
         for (NSNumber * fl in frequencyLines) {
-            float x = xFactor * log2(fl.floatValue/5);
+            float x = xFactor * (log2(fl.floatValue/5) - minFreqLog);
             CGContextFillRect(context, CGRectMake(x-0.5, 0, 1, self.bounds.size.height));
         }
         
         CGContextBeginPath(context);
         for (int i = 0; i < tmp.count; i ++) {
-            float xs = ([tmp[i][@"f"] doubleValue] == 0 ? 0 : xFactor * log2([tmp[i][@"f"] doubleValue]/5));
-            float p = [tmp[i][@"p"] doubleValue];
-            float dbLevel = (p == 0 ? -500 : 20 * log10(p));
-            float ys = dbLevel * yFactor;
+            float xs = ([tmp[i][@"f"] doubleValue] == 0 ? 0 : xFactor * (log2([tmp[i][@"f"] doubleValue]/5) - minFreqLog));
+            //float p = [tmp[i][@"p"] doubleValue];
+            //float ys = 20 * log10([tmp[i][@"p"] doubleValue] / yFS) * yFactor;
+            float ys = [tmp[i][@"p"] doubleValue] * yFactor;
             if (i == 0) {
-                CGContextMoveToPoint(context, xs, self.bounds.size.height-ys);
+                CGContextMoveToPoint(context, xs, -ys);
             } else {
                 CGContextAddLineToPoint(context, xs, self.bounds.size.height-ys);
             }

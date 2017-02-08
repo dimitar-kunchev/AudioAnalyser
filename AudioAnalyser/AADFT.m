@@ -13,7 +13,7 @@
 - (id) initWithSampleRate:(int)sampleRate {
     self = [super init];
     if (self) {
-        bufferSize = 2048;
+        bufferSize = 2048 * 2;
         buffer = malloc(bufferSize);
         _sampleRate = sampleRate;
         
@@ -40,6 +40,8 @@
         frequencies = [NSArray arrayWithArray:tmpFrequencies];
         
         bufferLock = [[NSLock alloc] init];
+        
+        DFTSetup = NULL;
     }
     return self;
 }
@@ -182,13 +184,14 @@
 
 - (NSArray *) computeOverData:(int16_t *)data length:(int)n {
     // Hamming window? Or better to use Hann? Blkman?
-    float * hammingWindow = (float *) malloc(sizeof(float) * n);
-    vDSP_blkman_window(hammingWindow, n, 0);
+    float * windowCoefficients = (float *) malloc(sizeof(float) * n);
+    vDSP_hann_window(windowCoefficients, n, 0);
     float * dataFloat = malloc(sizeof(float) * n);
     for (int i = 0; i < n; i ++) {
         dataFloat[i] = data[i];
     }
-    vDSP_vmul(dataFloat, 1, hammingWindow, 1, dataFloat, 1, n);
+    vDSP_vmul(dataFloat, 1, windowCoefficients, 1, dataFloat, 1, n);
+    free(windowCoefficients);
     
     // prepare input for the DSP
     DSPComplex * buf = malloc(sizeof(DSPComplex) * n);
@@ -208,28 +211,39 @@
     
     vDSP_ctoz(buf, 2, &inputSplit, 1, n);
     
-    vDSP_DFT_Setup setup = vDSP_DFT_zop_CreateSetup(NULL, n, vDSP_DFT_FORWARD);
+    free (buf);
     
-    vDSP_DFT_Execute(setup,
-                     inputSplit.realp, inputSplit.imagp,
-                     outputSplit.realp, outputSplit.imagp);
-    
-    vDSP_ztoc(&outputSplit, 1, buf, 2, n);
-    
-    NSMutableArray * result = [NSMutableArray arrayWithCapacity:n];
-    
-    // Perhaps use vDSP_vdbcon instead?
-    double tmp;
-    int sampleSizeSq = n * n;
-    double freqFactor = (double)self.sampleRate / n;
-    for (int i = 0; i < n; i ++) {
-        tmp = 10 * log10(4 * (buf[i].real * buf[i].real + buf[i].imag * buf[i].imag) / sampleSizeSq);
-        [result addObject:@{@"f": @(i * freqFactor),
-                            @"p": @(tmp)
-                            }];
+    if (DFTSetup == NULL) {
+        DFTSetup = vDSP_DFT_zop_CreateSetup(NULL, n, vDSP_DFT_FORWARD);
     }
     
-    free (buf);
+    vDSP_DFT_Execute(DFTSetup,
+                     inputSplit.realp, inputSplit.imagp,
+                     outputSplit.realp, outputSplit.imagp);
+
+    NSMutableArray * result = [NSMutableArray arrayWithCapacity:n];
+    outputSplit.imagp[0] = 0;
+    float * spectrum = malloc(sizeof(float) * n);
+    vDSP_zvmags(&outputSplit, 1, spectrum, 1, n);
+    
+    // Add -128db offset to avoid log(0).
+    float kZeroOffset = 1.5849e-13;
+    vDSP_vsadd(spectrum, 1, &kZeroOffset, spectrum, 1, n);
+    
+    // Convert power to decibel.
+    float kZeroDB = 0.70710678118f; // 1/sqrt(2)
+    vDSP_vdbcon(spectrum, 1, &kZeroDB, spectrum, 1, n, 1);
+    
+    double freqFactor = (double)self.sampleRate / n;
+    [result addObject:@{@"f": @(0),
+                        @"p": @(-200)
+                        }];
+    for (int i = 1; i * freqFactor < 20000; i ++) {
+        [result addObject:@{@"f": @(i * freqFactor),
+                            @"p": @(spectrum[i] - 120)
+                            }];
+    }
+    free(spectrum);
     return result;
 }
 

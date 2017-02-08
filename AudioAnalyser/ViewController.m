@@ -360,7 +360,7 @@ static OSStatus recordingCallback(void *inRefCon,
     AudioBufferList bufferList;
     bufferList.mNumberBuffers = 1;
     bufferList.mBuffers[0] = buffer;
-    
+     
     OSStatus status;
     
     status = AudioUnitRender([input audioUnit],
@@ -376,6 +376,8 @@ static OSStatus recordingCallback(void *inRefCon,
     }
     //NSLog(@"inNoFL %d, inBNL %d", inNumberFrames, inBusNumber);
     [input emitAudioBuffer:bufferList.mBuffers[0].mData size:bufferList.mBuffers[0].mDataByteSize];
+    
+    free(buffer.mData);
     
     return noErr;
 }
