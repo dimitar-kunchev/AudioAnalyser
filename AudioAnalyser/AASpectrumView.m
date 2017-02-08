@@ -57,11 +57,12 @@
         
         long bands = tmp.count;
         
-        float yFactor = (self.bounds.size.height-5) / 50; // assume 50dB max
-        float yFS = pow(2, 15);
+        float yFactor = (self.bounds.size.height-5) / 96; // assume 96dB max
+        //float yFS = pow(2, 15);
         for (int i = 0; i < tmp.count; i ++) {
             float xs = (i == 0 ? 0 : self.bounds.size.width * log10f(i) / log10f(bands));
-            float ys = 20 * log10([tmp[i][@"p"] doubleValue] / yFS) * yFactor;
+            //float ys = 20 * log10([tmp[i][@"p"] doubleValue] / yFS) * yFactor;
+            float ys = [tmp[i][@"p"] doubleValue] * yFactor;
             if (i == 0) {
                 CGContextMoveToPoint(context, xs, self.bounds.size.height-ys);
             } else {

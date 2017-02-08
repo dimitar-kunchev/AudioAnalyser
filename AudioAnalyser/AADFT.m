@@ -65,6 +65,7 @@
     }
     
     NSMutableArray * result = [NSMutableArray arrayWithCapacity:frequencies.count];
+    long sampleSizeSq = sampleSize * sampleSize;
     for (int fi = 0; fi < frequencies.count; fi ++) {
         double R = 0;
         double I = 0;
@@ -75,7 +76,8 @@
             R += data[sampleIndex] * cos(tmp);
             I -= data[sampleIndex] * sin(tmp);
         }
-        tmp = sqrt(R * R + I * I);
+        //tmp = sqrt(R * R + I * I);
+        tmp = 10 * log10(4 * (R*R + I*I) / sampleSizeSq);
         [result addObject:@{@"f": frequencies[fi],
                             @"p": @(tmp)
                             }];
