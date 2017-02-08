@@ -178,12 +178,24 @@
  */
 
 - (NSArray *) computeOverData:(int16_t *)data length:(int)n {
-    DSPComplex * buf = malloc(sizeof(DSPComplex) * n);
-    
+    // Hamming window? Or better to use Hann? Blkman?
+    float * hammingWindow = (float *) malloc(sizeof(float) * n);
+    vDSP_blkman_window(hammingWindow, n, 0);
+    float * dataFloat = malloc(sizeof(float) * n);
     for (int i = 0; i < n; i ++) {
-        buf[i].real = data[i];
+        dataFloat[i] = data[i];
+    }
+    vDSP_vmul(dataFloat, 1, hammingWindow, 1, dataFloat, 1, n);
+    
+    // prepare input for the DSP
+    DSPComplex * buf = malloc(sizeof(DSPComplex) * n);
+    for (int i = 0; i < n; i ++) {
+        buf[i].real = dataFloat[i];
         buf[i].imag = 0;
     }
+    
+    // dispose of the temporary float array
+    free(dataFloat);
     
     float inputMemory[2*n];
     float outputMemory[2*n];
@@ -203,6 +215,7 @@
     
     NSMutableArray * result = [NSMutableArray arrayWithCapacity:n];
     
+    // Perhaps use vDSP_vdbcon instead?
     double tmp;
     int sampleSizeSq = n * n;
     double freqFactor = (double)self.sampleRate / n;

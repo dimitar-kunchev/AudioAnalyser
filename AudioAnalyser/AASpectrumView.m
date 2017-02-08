@@ -25,7 +25,7 @@
 - (void) computingLoop {
     while (!endComputingThread) {
         @autoreleasepool {
-            //[NSThread sleepForTimeInterval:0.02];
+            [NSThread sleepForTimeInterval:0.02];
             NSArray * tmp = [fft compute];
             if (tmp != nil) {
                 @synchronized (self) {
