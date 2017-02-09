@@ -7,10 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "AAAudioManager.h"
 #import "AADFT.h"
 
-@interface AASpectrumView : UIView {
+@interface AASpectrumView : UIView <AAInputReaderDelegate> {
     AADFT * fft;
     BOOL endComputingThread;
     NSArray * fftComputedData;
@@ -18,6 +18,5 @@
     NSArray * frequencyLines;
 }
 
-- (void) setData:(const void *)newData size:(size_t)length;
 
 @end

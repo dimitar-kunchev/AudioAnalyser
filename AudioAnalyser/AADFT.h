@@ -19,7 +19,7 @@
     vDSP_DFT_Setup DFTSetup;
 }
 
-- (id) initWithSampleRate:(int)sampleRate;
+- (id) initWithSampleRate:(int)sampleRate bitRate:(int)bitsPerPacket;
 
 @property (nonatomic, readonly) int sampleRate;
 

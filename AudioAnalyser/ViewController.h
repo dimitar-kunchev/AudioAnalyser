@@ -14,26 +14,22 @@
 #import "AAOscilloscopeView.h"
 #import "AASpectrumView.h"
 
+#import "AAAudioManager.h"
+#import "CommonHelpers.h"
+
 #define kNumberBuffers 4
 
 @interface ViewController : UIViewController <AVCaptureAudioDataOutputSampleBufferDelegate> {
-    AVCaptureSession *captureSession;
-    AVCaptureAudioDataOutput * audioCaptureOutuput;
-    dispatch_queue_t samplingQueue;
+//    AVCaptureSession *captureSession;
+//    AVCaptureAudioDataOutput * audioCaptureOutuput;
+//    dispatch_queue_t samplingQueue;
     
-    char * audioBuffer;
-    size_t audioBufferSize;
-    NSLock * audioBufferLock;
+//    char * audioBuffer;
+//    size_t audioBufferSize;
+//    NSLock * audioBufferLock;
     
-@public
-    double frequency;
-    double sampleRate;
-    double theta;
-    double amplitude;
+    ///
 }
-
-@property (nonatomic) AudioComponentInstance audioUnit;
-@property (nonatomic) AudioComponentInstance audioUnitOutput;
 
 @property (nonatomic, retain) IBOutlet AAOscilloscopeView * oscilloscopeView;
 @property (nonatomic, retain) IBOutlet AASpectrumView * spectrumView;

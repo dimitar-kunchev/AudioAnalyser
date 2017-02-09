@@ -10,10 +10,10 @@
 
 @implementation AADFT
 
-- (id) initWithSampleRate:(int)sampleRate {
+- (id) initWithSampleRate:(int)sampleRate bitRate:(int)bitsPerPacket {
     self = [super init];
     if (self) {
-        bufferSize = 2048 * 4;
+        bufferSize = 1024 * 8 * bitsPerPacket; // we want to be able to hold 8 buffers with 1024 samples 
         buffer = malloc(bufferSize);
         _sampleRate = sampleRate;
         
@@ -46,14 +46,15 @@
     buffer = NULL;
 }
 
-- (NSArray *) computeOverData:(int16_t *)data length:(int)n {
+- (NSArray *) computeOverData:(Float32 *)data length:(int)n {
     // Hamming window? Or better to use Hann? Blkman?
     float * windowCoefficients = (float *) malloc(sizeof(float) * n);
     vDSP_hann_window(windowCoefficients, n, 0);
     float * dataFloat = malloc(sizeof(float) * n);
-    for (int i = 0; i < n; i ++) {
+    memcpy(dataFloat, data, sizeof(float) * n);
+    /*for (int i = 0; i < n; i ++) {
         dataFloat[i] = data[i];
-    }
+    }*/
     vDSP_vmul(dataFloat, 1, windowCoefficients, 1, dataFloat, 1, n);
     free(windowCoefficients);
     
@@ -113,7 +114,7 @@
 
 - (NSArray *) compute {
     long tmpBufferSize = bufferSize;
-    int16_t * tmpBuffer = malloc(tmpBufferSize);
+    Float32 * tmpBuffer = malloc(tmpBufferSize);
     if (tmpBuffer == NULL) {
         return nil;
     }
@@ -127,7 +128,7 @@
     
     NSArray * res = nil;
     if (gotBuffer) {
-        res = [self computeOverData:tmpBuffer length:(int)tmpBufferSize/2];
+        res = [self computeOverData:tmpBuffer length:(int)tmpBufferSize/sizeof(Float32)];
     }
     free (tmpBuffer);
 

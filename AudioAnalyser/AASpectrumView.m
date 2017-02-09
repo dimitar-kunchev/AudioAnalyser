@@ -13,7 +13,7 @@
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     if (self) {
-        fft = [[AADFT alloc] initWithSampleRate:44100];
+        fft = [[AADFT alloc] initWithSampleRate:96000 bitRate:sizeof(Float32)];
         
         endComputingThread = NO;
         
@@ -25,6 +25,8 @@
 }
 
 - (void) computingLoop {
+    NSString* appID = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleIdentifier"];
+    [[NSThread currentThread] setName:[appID stringByAppendingString:@".spectrum"]];
     while (!endComputingThread) {
         @autoreleasepool {
             [NSThread sleepForTimeInterval:0.02];
@@ -57,7 +59,7 @@
         
         //long bands = tmp.count;
         
-        float yFactor = (self.bounds.size.height-5) / 120; // pixels per dB
+        float yFactor = (self.bounds.size.height-5) / 144; // pixels per dB
         // float yFS = pow(2, 15);
         float minFreqLog = log2(20/5);
         float xFactor = self.bounds.size.width / (log2(20000/5) - minFreqLog); // max-min freq
@@ -73,10 +75,11 @@
         for (int i = 0; i < tmp.count; i ++) {
             float xs = ([tmp[i][@"f"] doubleValue] == 0 ? 0 : xFactor * (log2([tmp[i][@"f"] doubleValue]/5) - minFreqLog));
             float ys = [tmp[i][@"p"] doubleValue] * yFactor;
+            if (isnan(ys) || isinf(ys)) ys = -10000;
             if (i == 0) {
                 CGContextMoveToPoint(context, xs, -ys);
             } else {
-                CGContextAddLineToPoint(context, xs, self.bounds.size.height-ys);
+                CGContextAddLineToPoint(context, xs, -ys);
             }
         }
         [[UIColor blueColor] setStroke];
@@ -86,10 +89,8 @@
 }
 
 
-- (void) setData:(const void *)newData size:(size_t)length {
-    [fft appendData:newData length:(int)length];
-    
-    
+- (void) inputGotAudioBuffer: (void *)buffer size:(int)size {
+    [fft appendData:buffer length:(int)size];
 }
 
 @end

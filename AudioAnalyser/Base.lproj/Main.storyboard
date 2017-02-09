@@ -25,11 +25,7 @@
                                 <rect key="frame" x="0.0" y="20" width="375" height="647"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zc1-2I-sZV" customClass="AASpectrumView">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="323.5"/>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    </view>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ph7-9i-ZRZ" customClass="AAOscilloscopeView">
-                                        <rect key="frame" x="0.0" y="323.5" width="375" height="323.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
                                 </subviews>
@@ -45,7 +41,6 @@
                     </view>
                     <simulatedStatusBarMetrics key="simulatedStatusBarMetrics" statusBarStyle="lightContent"/>
                     <connections>
-                        <outlet property="oscilloscopeView" destination="Ph7-9i-ZRZ" id="FSe-TC-Vx5"/>
                         <outlet property="spectrumView" destination="zc1-2I-sZV" id="WE5-Of-JTE"/>
                     </connections>
                 </viewController>
