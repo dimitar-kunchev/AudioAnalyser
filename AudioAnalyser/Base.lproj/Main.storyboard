@@ -21,13 +21,22 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="FCJ-aw-eHd">
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="FCJ-aw-eHd">
                                 <rect key="frame" x="0.0" y="20" width="375" height="647"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zc1-2I-sZV" customClass="AASpectrumView">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="607"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
+                                    <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FuZ-Mo-z4n">
+                                        <rect key="frame" x="0.0" y="607" width="375" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="40" id="LAh-hZ-SHW"/>
+                                        </constraints>
+                                        <connections>
+                                            <segue destination="SyF-mS-cnl" kind="embed" id="fyh-Zi-CBA"/>
+                                        </connections>
+                                    </containerView>
                                 </subviews>
                             </stackView>
                         </subviews>
@@ -47,6 +56,52 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="117.59999999999999" y="115.59220389805098"/>
+        </scene>
+        <!--Signal Generator Control View Controller-->
+        <scene sceneID="Vxj-ex-Ubi">
+            <objects>
+                <viewController id="SyF-mS-cnl" customClass="AASignalGeneratorControlViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="aKq-YD-E98">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="40"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kdf-ff-brM">
+                                <rect key="frame" x="8" y="5" width="30" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="30" id="FIM-MF-f4p"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="30" id="m03-F6-KAA"/>
+                                    <constraint firstAttribute="height" constant="30" id="mwp-JU-ATv"/>
+                                </constraints>
+                                <state key="normal" title="&gt;"/>
+                                <connections>
+                                    <action selector="toggleEnabled:" destination="SyF-mS-cnl" eventType="touchUpInside" id="gjj-xX-IPE"/>
+                                </connections>
+                            </button>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.25" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="Ovp-XH-PUl">
+                                <rect key="frame" x="44" y="6" width="325" height="26"/>
+                                <connections>
+                                    <action selector="amplitudeChanged:" destination="SyF-mS-cnl" eventType="valueChanged" id="Dua-AS-t0f"/>
+                                </connections>
+                            </slider>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="Ovp-XH-PUl" firstAttribute="leading" secondItem="kdf-ff-brM" secondAttribute="trailing" constant="8" id="1dW-UI-CCD"/>
+                            <constraint firstItem="kdf-ff-brM" firstAttribute="leading" secondItem="aKq-YD-E98" secondAttribute="leading" constant="8" id="5DL-xT-zmM"/>
+                            <constraint firstItem="kdf-ff-brM" firstAttribute="top" secondItem="aKq-YD-E98" secondAttribute="top" constant="5" id="D7G-hT-uWy"/>
+                            <constraint firstItem="Ovp-XH-PUl" firstAttribute="baseline" secondItem="kdf-ff-brM" secondAttribute="baseline" id="HIf-0X-w4M"/>
+                            <constraint firstAttribute="trailing" secondItem="Ovp-XH-PUl" secondAttribute="trailing" constant="8" id="Zrg-TC-lHZ"/>
+                            <constraint firstItem="Ovp-XH-PUl" firstAttribute="top" secondItem="aKq-YD-E98" secondAttribute="top" constant="6" id="egY-S4-O10"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="amplitudeSlider" destination="Ovp-XH-PUl" id="shG-Vs-cjn"/>
+                        <outlet property="toggleEnabledButton" destination="kdf-ff-brM" id="LW9-gS-lwn"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="FnU-Y2-LhM" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="964" y="425.48725637181411"/>
         </scene>
     </scenes>
 </document>

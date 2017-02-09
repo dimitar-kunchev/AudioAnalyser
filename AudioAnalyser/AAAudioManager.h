@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 
 #import "AASignalGenerator.h"
 #import "AAInputReader.h"

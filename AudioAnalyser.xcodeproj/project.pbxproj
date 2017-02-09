@@ -13,6 +13,7 @@
 		564DA0B71E4C5E0800567A82 /* AASignalGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 564DA0B61E4C5E0800567A82 /* AASignalGenerator.m */; };
 		564DA0BA1E4C5F4400567A82 /* AAInputReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 564DA0B91E4C5F4400567A82 /* AAInputReader.m */; };
 		564DA0BD1E4C6D7C00567A82 /* CommonHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 564DA0BC1E4C6D7C00567A82 /* CommonHelpers.m */; };
+		564DA0C81E4CAF4800567A82 /* AASignalGeneratorControlViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 564DA0C71E4CAF4800567A82 /* AASignalGeneratorControlViewController.m */; };
 		56532D081E4625CF00F49DD0 /* AASpectrumView.m in Sources */ = {isa = PBXBuildFile; fileRef = 56532D071E4625CF00F49DD0 /* AASpectrumView.m */; };
 		56C65B041E45C82F00F2EADB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 56C65B031E45C82F00F2EADB /* main.m */; };
 		56C65B071E45C82F00F2EADB /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 56C65B061E45C82F00F2EADB /* AppDelegate.m */; };
@@ -38,6 +39,8 @@
 		564DA0B91E4C5F4400567A82 /* AAInputReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AAInputReader.m; sourceTree = "<group>"; };
 		564DA0BB1E4C6CC000567A82 /* CommonHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommonHelpers.h; sourceTree = "<group>"; };
 		564DA0BC1E4C6D7C00567A82 /* CommonHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommonHelpers.m; sourceTree = "<group>"; };
+		564DA0C61E4CAF4800567A82 /* AASignalGeneratorControlViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AASignalGeneratorControlViewController.h; sourceTree = "<group>"; };
+		564DA0C71E4CAF4800567A82 /* AASignalGeneratorControlViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AASignalGeneratorControlViewController.m; sourceTree = "<group>"; };
 		56532D061E4625CF00F49DD0 /* AASpectrumView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AASpectrumView.h; sourceTree = "<group>"; };
 		56532D071E4625CF00F49DD0 /* AASpectrumView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AASpectrumView.m; sourceTree = "<group>"; };
 		56C65AFF1E45C82F00F2EADB /* AudioAnalyser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioAnalyser.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -76,6 +79,36 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		564DA0BE1E4CAD7800567A82 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				56C65B221E45FC2D00F2EADB /* AAOscilloscopeView.h */,
+				56C65B231E45FC2D00F2EADB /* AAOscilloscopeView.m */,
+				56532D061E4625CF00F49DD0 /* AASpectrumView.h */,
+				56532D071E4625CF00F49DD0 /* AASpectrumView.m */,
+				564DA0C61E4CAF4800567A82 /* AASignalGeneratorControlViewController.h */,
+				564DA0C71E4CAF4800567A82 /* AASignalGeneratorControlViewController.m */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		564DA0C01E4CAD8B00567A82 /* Audio Stuff */ = {
+			isa = PBXGroup;
+			children = (
+				56C65B251E461A6E00F2EADB /* AADFT.h */,
+				56C65B261E461A6E00F2EADB /* AADFT.m */,
+				564DA0B21E4C5DBD00567A82 /* AAAudioManager.h */,
+				564DA0B31E4C5DBD00567A82 /* AAAudioManager.m */,
+				564DA0B51E4C5E0800567A82 /* AASignalGenerator.h */,
+				564DA0B61E4C5E0800567A82 /* AASignalGenerator.m */,
+				564DA0B81E4C5F4400567A82 /* AAInputReader.h */,
+				564DA0B91E4C5F4400567A82 /* AAInputReader.m */,
+				564DA0BB1E4C6CC000567A82 /* CommonHelpers.h */,
+				564DA0BC1E4C6D7C00567A82 /* CommonHelpers.m */,
+			);
+			name = "Audio Stuff";
+			sourceTree = "<group>";
+		};
 		56C65AF61E45C82F00F2EADB = {
 			isa = PBXGroup;
 			children = (
@@ -103,22 +136,9 @@
 				56C65B0B1E45C82F00F2EADB /* Main.storyboard */,
 				56C65B0E1E45C82F00F2EADB /* Assets.xcassets */,
 				56C65B101E45C82F00F2EADB /* LaunchScreen.storyboard */,
-				56C65B131E45C82F00F2EADB /* Info.plist */,
+				564DA0BE1E4CAD7800567A82 /* Views */,
+				564DA0C01E4CAD8B00567A82 /* Audio Stuff */,
 				56C65B021E45C82F00F2EADB /* Supporting Files */,
-				56C65B221E45FC2D00F2EADB /* AAOscilloscopeView.h */,
-				56C65B231E45FC2D00F2EADB /* AAOscilloscopeView.m */,
-				56532D061E4625CF00F49DD0 /* AASpectrumView.h */,
-				56532D071E4625CF00F49DD0 /* AASpectrumView.m */,
-				56C65B251E461A6E00F2EADB /* AADFT.h */,
-				56C65B261E461A6E00F2EADB /* AADFT.m */,
-				564DA0B21E4C5DBD00567A82 /* AAAudioManager.h */,
-				564DA0B31E4C5DBD00567A82 /* AAAudioManager.m */,
-				564DA0B51E4C5E0800567A82 /* AASignalGenerator.h */,
-				564DA0B61E4C5E0800567A82 /* AASignalGenerator.m */,
-				564DA0B81E4C5F4400567A82 /* AAInputReader.h */,
-				564DA0B91E4C5F4400567A82 /* AAInputReader.m */,
-				564DA0BB1E4C6CC000567A82 /* CommonHelpers.h */,
-				564DA0BC1E4C6D7C00567A82 /* CommonHelpers.m */,
 			);
 			path = AudioAnalyser;
 			sourceTree = "<group>";
@@ -126,6 +146,7 @@
 		56C65B021E45C82F00F2EADB /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				56C65B131E45C82F00F2EADB /* Info.plist */,
 				56C65B031E45C82F00F2EADB /* main.m */,
 			);
 			name = "Supporting Files";
@@ -226,6 +247,7 @@
 				56C65B041E45C82F00F2EADB /* main.m in Sources */,
 				56C65B241E45FC2D00F2EADB /* AAOscilloscopeView.m in Sources */,
 				564DA0BA1E4C5F4400567A82 /* AAInputReader.m in Sources */,
+				564DA0C81E4CAF4800567A82 /* AASignalGeneratorControlViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

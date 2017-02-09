@@ -19,8 +19,6 @@ OSStatus playbackCallback(void *inRefCon,
 @interface AASignalGenerator ()
 
 @property (nonatomic) double theta;
-@property (nonatomic) double amplitude;
-@property (nonatomic) double frequency;
 @property (nonatomic) double sampleRate;
 @property (nonatomic) double bitRate;
 

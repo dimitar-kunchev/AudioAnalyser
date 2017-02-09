@@ -19,5 +19,8 @@
 
 @property (nonatomic) BOOL enabled;
 
+@property (nonatomic) double amplitude;
+@property (nonatomic) double frequency;
+
 
 @end

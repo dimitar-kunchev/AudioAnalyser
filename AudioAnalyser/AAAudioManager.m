@@ -24,6 +24,16 @@
     if (self) {
         _inputReader = [[AAInputReader alloc] init];
         _signalGenerator = [[AASignalGenerator alloc] init];
+        
+        
+        /*
+         // testing of selecting input via the AVAudioSession works - it does nicely
+         NSLog(@"Available inptus: %@", [[AVAudioSession sharedInstance] availableInputs]);
+         
+         [[AVAudioSession sharedInstance] setPreferredInput:[[AVAudioSession sharedInstance] availableInputs][0]
+         error:nil];
+         
+         */
     }
     return self;
 }
