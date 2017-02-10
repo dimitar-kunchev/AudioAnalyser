@@ -16,6 +16,8 @@
     NSArray * fftComputedData;
     
     NSArray * frequencyLines;
+    float minDisplayValue;
+    float maxDisplayValue;
 }
 
 

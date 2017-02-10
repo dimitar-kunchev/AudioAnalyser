@@ -46,7 +46,7 @@
     buffer = NULL;
 }
 
-- (NSArray *) computeOverData:(Float32 *)data length:(int)n {
+- (NSDictionary *) computeOverData:(Float32 *)data length:(int)n {
     // Hamming window? Or better to use Hann? Blkman?
     float * windowCoefficients = (float *) malloc(sizeof(float) * n);
     vDSP_hann_window(windowCoefficients, n, 0);
@@ -98,21 +98,22 @@
     // Convert power to decibel.
     float kZeroDB = 0.70710678118f; // 1/sqrt(2)
     vDSP_vdbcon(spectrum, 1, &kZeroDB, spectrum, 1, n, 1);
+    float minValue = 0, maxValue = 0;
+    //vDSP_minv(spectrum, 1, &minValue, n);
+    //vDSP_maxv(spectrum, 1, &maxValue, n);
     
     double freqFactor = (double)self.sampleRate / n;
-    [result addObject:@{@"f": @(0),
-                        @"p": @(-200)
-                        }];
-    for (int i = 1; i * freqFactor < 20000; i ++) {
+    
+    for (int i = 0; i * freqFactor < 20000; i ++) {
         [result addObject:@{@"f": @(i * freqFactor),
-                            @"p": @(spectrum[i] - 144)
+                            @"p": @(spectrum[i])
                             }];
     }
     free(spectrum);
-    return result;
+    return @{@"data": result, @"min": @(minValue), @"max": @(maxValue)};
 }
 
-- (NSArray *) compute {
+- (NSDictionary *) compute {
     long tmpBufferSize = bufferSize;
     Float32 * tmpBuffer = malloc(tmpBufferSize);
     if (tmpBuffer == NULL) {
@@ -126,7 +127,7 @@
         [bufferLock unlock];
     }
     
-    NSArray * res = nil;
+    NSDictionary * res = nil;
     if (gotBuffer) {
         res = [self computeOverData:tmpBuffer length:(int)tmpBufferSize/sizeof(Float32)];
     }

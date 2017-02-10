@@ -27,6 +27,6 @@
 
 // - (void) computeOverData:(uint16_t *)data length:(long)sampleSize out:(double **)outData outLength:(int *)outDataLength;
 
-- (NSArray *) compute;
+- (NSDictionary *) compute;
 
 @end

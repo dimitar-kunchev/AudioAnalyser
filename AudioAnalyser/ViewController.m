@@ -31,6 +31,14 @@
 }
 
 - (void) setupAudio {
+    NSError * error = nil;
+    /// Add to the options mixing and ducking of needed!
+    if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
+                                                 mode:AVAudioSessionModeMeasurement
+                                              options:AVAudioSessionCategoryOptionAllowAirPlay | AVAudioSessionCategoryOptionAllowBluetoothA2DP
+                                                error:&error]) {
+        NSLog(@"Could not set Audio Session properties! Error: %@", error.localizedDescription);
+    }
     [[[AAAudioManager manager] inputReader] setDelegate:self.spectrumView];
     
     [[AAAudioManager manager] setOutputEnabled:NO];
